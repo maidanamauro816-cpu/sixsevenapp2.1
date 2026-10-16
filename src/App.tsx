@@ -108,7 +108,7 @@ export default function App() {
   const title = showSettings ? "Ajustes" : activeChat ? activeChat.name : tab;
 
   return (
-    <main className={`app-shell theme-${theme.toLowerCase().replaceAll(" ", "-")}`}>
+    <main className={`app-shell theme-${theme.toLowerCase().replace(/ /g, "-")}`}>
       <header className="topbar">
         <div className="brand">
           {activeChat && !showSettings
