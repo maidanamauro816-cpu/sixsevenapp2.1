@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   ArrowLeft, Bell, Check, CheckCheck, CircleDot, LockKeyhole, MessageCircle,
   MoreVertical, Music2, Paperclip, Palette, Phone, Plus, Search, Send,
@@ -27,6 +27,29 @@ const initialChats: Chat[] = [
     messages: [{ id: "w1", text: "Bienvenido a SixSeven. Tu espacio, tus amigos, tus reglas. 🖤", time: "Ayer", mine: false }] }
 ];
 
+const CHAT_STORAGE_KEY = "sixseven.chats.v1";
+const THEME_STORAGE_KEY = "sixseven.theme.v1";
+
+function loadSavedChats(): Chat[] {
+  try {
+    const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (!saved) return initialChats;
+    const parsed: unknown = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed as Chat[] : initialChats;
+  } catch {
+    return initialChats;
+  }
+}
+
+function loadSavedTheme(): string {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    return saved === "Rojo neón" || saved === "Azul eléctrico" || saved === "Violeta" ? saved : "Rojo neón";
+  } catch {
+    return "Rojo neón";
+  }
+}
+
 const tabs: { label: Tab; icon: typeof MessageCircle }[] = [
   { label: "Chats", icon: MessageCircle }, { label: "Llamadas", icon: Phone },
   { label: "Estados", icon: CircleDot }, { label: "Música", icon: Music2 },
@@ -37,12 +60,20 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("Chats");
   const [query, setQuery] = useState("");
   const [showSettings, setShowSettings] = useState(false);
-  const [theme, setTheme] = useState("Rojo neón");
-  const [chats, setChats] = useState<Chat[]>(initialChats);
+  const [theme, setTheme] = useState<string>(() => loadSavedTheme());
+  const [chats, setChats] = useState<Chat[]>(() => loadSavedChats());
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [showNewChat, setShowNewChat] = useState(false);
   const [newContact, setNewContact] = useState("");
+  useEffect(() => {
+    try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chats)); } catch { /* Storage may be disabled or full. */ }
+  }, [chats]);
+
+  useEffect(() => {
+    try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch { /* Keep the current theme for this session. */ }
+  }, [theme]);
+
   const activeChat = chats.find(chat => chat.id === activeChatId) ?? null;
   const filteredChats = useMemo(() => chats.filter(chat =>
     chat.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -82,7 +113,7 @@ export default function App() {
         <div className="brand">
           {activeChat && !showSettings
             ? <button className="icon-button back-button" aria-label="Volver a chats" onClick={() => setActiveChatId(null)}><ArrowLeft size={20}/></button>
-            : <div className="brand-mark" aria-label="Logo SixSeven">S<span>7</span></div>}
+            : <div className="brand-mark" aria-label="Logo SixSeven"><svg viewBox="0 0 40 40" role="img" aria-hidden="true"><path d="M11 10 15 5 20 9 25 5 29 10 28 14 12 14Z" fill="currentColor" opacity=".95"/><path d="M28 17H15L11 21 15 25H25L29 29 25 34H11" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M25 25 29 29 25 34" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"/></svg><span>7</span></div>}
           <div><strong>SixSeven</strong><small>CHAT · CONNECT · REPEAT</small></div>
         </div>
         <div className="top-actions">
