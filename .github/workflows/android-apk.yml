@@ -3,13 +3,27 @@ name: Build SixSeven Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
     paths:
       - "src/**"
+      - "public/**"
+      - "index.html"
       - "package.json"
       - "package-lock.json"
       - "capacitor.config.ts"
       - "vite.config.ts"
+      - "tsconfig.json"
+      - ".github/workflows/android-apk.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "capacitor.config.ts"
+      - "vite.config.ts"
+      - "tsconfig.json"
       - ".github/workflows/android-apk.yml"
 
 permissions:
@@ -22,28 +36,34 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Install dependencies
-        run: npm install
-      - name: Build web app
-        run: npm run build
-      - name: Add Android platform
-        run: npx cap add android
-      - name: Sync Capacitor
-        run: npx cap sync android
+          node-version: "22"
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Type-check and build web app
+        run: npm run build
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
       - name: Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew assembleDebug
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
