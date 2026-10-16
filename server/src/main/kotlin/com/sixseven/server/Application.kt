@@ -2,22 +2,18 @@ package com.sixseven.server
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
-import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.close
-import io.ktor.websocket.Frame
-import kotlinx.coroutines.channels.consumeEach
 
 fun Application.module() {
     install(WebSockets)
@@ -26,7 +22,7 @@ fun Application.module() {
     val jwtIssuer = System.getenv("JWT_ISSUER") ?: "sixseven"
     val jwtAudience = System.getenv("JWT_AUDIENCE") ?: "sixseven-android"
 
-    // Fail closed: do not start a production server with a missing signing secret.
+    // Fail closed: never start with a missing signing secret.
     require(!jwtSecret.isNullOrBlank()) {
         "JWT_SECRET must be configured through the hosting environment."
     }
@@ -50,7 +46,7 @@ fun Application.module() {
 
     routing {
         get("/health") {
-            call.respond(mapOf("status" to "ok", "service" to "sixseven-server"))
+            call.respondText("ok")
         }
 
         authenticate("auth-jwt") {
