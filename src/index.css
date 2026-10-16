@@ -56,3 +56,5 @@
 .new-chat-modal .primary-button{width:100%;height:43px;margin-top:8px}
 .primary-button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:380px){.topbar{padding:0 14px}.page{padding-left:14px;padding-right:14px}.brand small{letter-spacing:1px;font-size:7px}.message-list{max-height:calc(100dvh - 340px)}.composer{gap:3px}.composer-tool{width:28px}}
+
+.brand-mark svg{display:block;width:31px;height:31px;filter:drop-shadow(0 0 4px currentColor)}
