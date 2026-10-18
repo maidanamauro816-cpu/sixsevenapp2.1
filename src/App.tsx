@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { MessageCircle, Phone, CircleDot, Music2, UserRound, Search, Plus, Settings, ChevronRight, ShieldCheck, Users, Bell, Palette } from "lucide-react";
+import { MessageCircle, Phone, CircleDot, Music2, Search, Plus, Settings, ChevronRight, ShieldCheck, Users, Bell, Palette, Sparkles } from "lucide-react";
+import MusicLibrary from "./MusicLibrary";
+import type { MusicTrack } from "./musicApiService";
 
-type Tab = "Chats" | "Llamadas" | "Estados" | "Música" | "Perfil";
+type Tab = "Chats" | "Llamadas" | "Estados" | "Música" | "SixSeven AI";
 
 const demoChats = [
   { name: "Bienvenido a SixSeven", text: "Tu espacio de comunicación empieza aquí.", time: "Ahora", initials: "S", unread: 1 },
@@ -19,10 +21,16 @@ export default function App() {
     { label: "Llamadas", icon: Phone },
     { label: "Estados", icon: CircleDot },
     { label: "Música", icon: Music2 },
-    { label: "Perfil", icon: UserRound }
+    { label: "SixSeven AI", icon: Sparkles }
   ];
 
   const title = showSettings ? "Ajustes" : tab;
+  const useTrack = (track: MusicTrack, destination: "chat" | "status") => {
+    const target = destination === "chat" ? "mensaje" : "estado";
+    const link = track.externalUrl ? "\n\nEnlace oficial: " + track.externalUrl : "";
+    window.alert(`Canción seleccionada para ${target}:\n${track.title} — ${track.artist}${link}\n\nLa interfaz de mensajería/estados reales todavía necesita conectarse al backend.`);
+  };
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -47,8 +55,8 @@ export default function App() {
           <>
             <label className="search-box"><Search size={18}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar conversaciones"/></label>
             <div className="notice"><span className="status-dot"/><div><b>Prototipo de SixSeven 2.1</b><p>Interfaz inicial. Los mensajes reales todavía no están conectados.</p></div></div>
-            <div className="section-label">RECENTES <span>{demoChats.length} elementos de muestra</span></div>
-            {demoChats.filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.text.toLowerCase().includes(query.toLowerCase())).map(chat => <button className="chat-row" key={chat.name} onClick={() => alert("Esta conversación es una vista de demostración. El envío real se conectará al backend.")}><div className="avatar">{chat.initials}</div><div className="chat-copy"><b>{chat.name}</b><span>{chat.text}</span></div><div className="chat-meta"><small>{chat.time}</small>{chat.unread > 0 && <i>{chat.unread}</i>}</div></button>)}
+            <div className="section-label">RECIENTES <span>{demoChats.length} elementos de muestra</span></div>
+            {demoChats.filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.text.toLowerCase().includes(query.toLowerCase())).map(chat => <button className="chat-row" key={chat.name} onClick={() => window.alert("Esta conversación es una vista de demostración. El envío real se conectará al backend.")}><div className="avatar">{chat.initials}</div><div className="chat-copy"><b>{chat.name}</b><span>{chat.text}</span></div><div className="chat-meta"><small>{chat.time}</small>{chat.unread > 0 && <i>{chat.unread}</i>}</div></button>)}
             <button className="feature-card" onClick={() => setShowSettings(true)}><div className="feature-icon"><Palette/></div><div><b>Hazlo tuyo</b><span>Temas, burbujas y tonos personalizables.</span></div><ChevronRight/></button>
           </>
         ) : tab === "Llamadas" ? (
@@ -56,9 +64,9 @@ export default function App() {
         ) : tab === "Estados" ? (
           <div className="empty-state"><div className="empty-icon"><CircleDot size={28}/></div><h2>Estados</h2><p>Este espacio será para compartir actualizaciones con tus contactos cuando se conecte el backend.</p></div>
         ) : tab === "Música" ? (
-          <div className="empty-state"><div className="empty-icon"><Music2 size={28}/></div><h2>Música</h2><p>El reproductor nativo y la selección de archivos locales se implementarán en una siguiente etapa.</p></div>
+          <MusicLibrary onClose={() => setTab("Chats")} onUseTrack={useTrack}/>
         ) : (
-          <div className="empty-state"><div className="empty-icon"><UserRound size={28}/></div><h2>Tu perfil</h2><p>El inicio de sesión con Google y la edición de perfil requieren configuración de Firebase.</p><button className="primary-button" onClick={() => setShowSettings(true)}>Abrir ajustes</button></div>
+          <div className="empty-state"><div className="empty-icon"><Sparkles size={28}/></div><h2>SixSeven AI</h2><p>La esfera de asistencia y las funciones de voz se conectarán al motor de IA cuando configuremos el backend seguro.</p><button className="primary-button" onClick={() => setShowSettings(true)}>Abrir ajustes</button></div>
         )}
       </section>
 
